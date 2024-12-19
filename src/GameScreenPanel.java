@@ -4,7 +4,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.random.*;
 
 public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     private GameScreen gameScreen;
@@ -26,13 +25,18 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
         balls = new ArrayList<>();
         balls.add(new Ball(BlockBreaker.FRAME_WIDTH/2-5, BlockBreaker.FRAME_HEIGHT-40-30-5, -2, -3));
         paddle = new Paddle(BlockBreaker.FRAME_WIDTH/2-75, BlockBreaker.FRAME_HEIGHT-40-30);
-        blocks = new ArrayList<>();
-        Random random = new Random();
 
-        for (int i = 0; i < 6; i++) {
-            for (int j = 0; j < 10; j++) {
-                boolean isYellow = random.nextBoolean();
-                blocks.add(new Block(5 + j * 55, 5 + i * 25, isYellow));
+        blocks = new ArrayList<>();
+
+        int blockWidth = 50;
+        int blockHeight = 20;
+        int padding = 5;
+
+        for (int row = 0; row < 6; row++) {
+            for (int col = 0; col < 10; col++) {
+                int x = 20 + padding + col * (blockWidth + padding);
+                int y = 50 + row * (blockHeight + padding);
+                blocks.add(new Block(x, y, new Random().nextBoolean()));
             }
         }
     }
@@ -73,14 +77,27 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     @Override
     protected  void paintComponent(Graphics g) {
         super.paintComponent(g);
+
         g.setColor(Color.black);
         g.fillRect(0, 0, getWidth(), getHeight());
 
+        // 좌우 벽 그리기
+        g.setColor(Color.GREEN);
+        g.fillRect(0, 0, 20, getHeight());  // 좌측 벽
+        g.fillRect(getWidth() - 20, 0, 20, getHeight());    // 우측 벽
+
+        // 상단 벽 그리기
+        g.fillRect(0, 0, getWidth(), 20);
+
+        // 벽돌 그리기
         for (Ball ball : balls){
             ball.draw(g);
         }
+
+        // 패들 그리기
         paddle.draw(g);
 
+        // 블럭 그리기
         for (Block block : blocks){
             block.draw(g);
         }
@@ -119,8 +136,8 @@ class Ball{
         x += dx;
         y += dy;
 
-        if (x < 0 || x > BlockBreaker.FRAME_WIDTH - size) dx = -dx;
-        if(y < 0 ) dy = -dy;
+        if (x < 20 || x > BlockBreaker.FRAME_WIDTH - size -20) dx = -dx;
+        if(y < 20 ) dy = -dy;
     }
 
     public void checkCollision(Paddle paddle, ArrayList<Block> blocks, ArrayList<Ball> balls){
