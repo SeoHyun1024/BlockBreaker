@@ -7,16 +7,16 @@ public class GameOverScreen extends JPanel{
     private JPanel p;
     private GameScreen gameScreen;
 
-    public GameOverScreen(GameScreen gameScreen) {
+    public GameOverScreen(int score, int highScore, GameScreen gameScreen) {
         this.gameScreen = gameScreen;
-        initcomponents();
+        initcomponents(score, highScore);
     }
 
     public JPanel getPanel() {
         return p;
     }
 
-    public void initcomponents(){
+    public void initcomponents(int score, int highScore) {
         p = new JPanel(){
           @Override
           protected void paintComponent(Graphics g) {
@@ -26,6 +26,9 @@ public class GameOverScreen extends JPanel{
               g.setColor(Color.RED);
               g.setFont(new Font("Arial", Font.BOLD, 36));
               g.drawString("Game Over", 150, 200);
+              g.drawString("Score: " + score, 150, 250);
+              g.drawString("High Score: " + highScore, 150, 300);
+
               g.setFont(new Font("Arial", Font.PLAIN, 24));
               g.drawString("Press Spacebar to Restart!", 150, 250);
           }

@@ -8,9 +8,12 @@ import java.util.Random;
 public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     private GameScreen gameScreen;
     private ArrayList<Ball> balls;
-    private Paddle paddle;
+    private Racket racket;
     private ArrayList<Block> blocks;
     private boolean running;
+    private int level = 1;
+    static int score = 0;
+    private static int highScore = 0;
 
     public GameScreenPanel(GameScreen gameScreen) {
         this.gameScreen = gameScreen;
@@ -24,25 +27,33 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     private void initGameObjects() {
         balls = new ArrayList<>();
         balls.add(new Ball(BlockBreaker.FRAME_WIDTH/2-5, BlockBreaker.FRAME_HEIGHT-40-30-5, -2, -3));
-        paddle = new Paddle(BlockBreaker.FRAME_WIDTH/2-75, BlockBreaker.FRAME_HEIGHT-40-30);
+        racket = new Racket(BlockBreaker.FRAME_WIDTH/2-75, BlockBreaker.FRAME_HEIGHT-40-30);
 
+       generateBlocks();    // 블럭 생성
+    }
+
+    private void generateBlocks(){
         blocks = new ArrayList<>();
+        int rows = level * 3;
+        int cols = level * 3;
 
-        int blockWidth = 50;
-        int blockHeight = 20;
-        int padding = 5;
+        int padding = 3;
+        int blockWidth = (BlockBreaker.FRAME_WIDTH - cols * padding - 40 )/cols;
+        int blockHeight = ((BlockBreaker.FRAME_HEIGHT / 3) - 2 * padding)/rows;
 
-        for (int row = 0; row < 6; row++) {
-            for (int col = 0; col < 10; col++) {
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
                 int x = 20 + padding + col * (blockWidth + padding);
-                int y = 50 + row * (blockHeight + padding);
-                blocks.add(new Block(x, y, new Random().nextBoolean()));
+                int y = 20 + row * (blockHeight + padding) + padding;
+                boolean isYellow = new Random().nextBoolean();
+                blocks.add(new Block(x, y, blockWidth, blockHeight, isYellow));
             }
         }
     }
 
     public void startGame(){
         running = true;
+        score = 0;
         requestFocus();
         Thread thread = new Thread(this);
         thread.start();
@@ -53,15 +64,23 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
         while (running){
             for (Ball ball : new ArrayList<>(balls)){
                 ball.move();
-                ball.checkCollision(paddle, blocks, balls);
+                ball.checkCollision(racket, blocks, balls);
 
                 if (ball.getY() > getHeight()){
                     balls.remove(ball);
                     if(balls.isEmpty()){
                         running = false;
-                        gameScreen.showGameOverScreen();
+                        highScore = Math.max(highScore,score);
+                        gameScreen.showGameOverScreen(score, highScore);
                     }
                 }
+            }
+
+            if (blocks.isEmpty()){
+                level++;
+                generateBlocks();
+                balls.clear();
+                balls.add(new Ball(BlockBreaker.FRAME_WIDTH/2-5, BlockBreaker.FRAME_HEIGHT-40-30-5, -2, -3));
             }
 
             repaint();
@@ -95,7 +114,7 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
         }
 
         // 패들 그리기
-        paddle.draw(g);
+        racket.draw(g);
 
         // 블럭 그리기
         for (Block block : blocks){
@@ -110,10 +129,10 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     public void keyPressed(KeyEvent e) {
         if(e.getKeyCode() == KeyEvent.VK_LEFT){
             System.out.println("LEFT");
-            paddle.moveLeft();
+            racket.moveLeft();
         }else if (e.getKeyCode() == KeyEvent.VK_RIGHT){
             System.out.println("RIGHT");
-            paddle.moveRight();
+            racket.moveRight();
         }
         repaint();
     }
@@ -140,9 +159,9 @@ class Ball{
         if(y < 20 ) dy = -dy;
     }
 
-    public void checkCollision(Paddle paddle, ArrayList<Block> blocks, ArrayList<Ball> balls){
+    public void checkCollision(Racket racket, ArrayList<Block> blocks, ArrayList<Ball> balls){
         Rectangle ballRect = new Rectangle(x, y, size, size);
-        if (ballRect.intersects(paddle.getBounds())) {
+        if (ballRect.intersects(racket.getBounds())) {
             dy = -Math.abs(dy); // Always bounce upward
         }
 
@@ -151,6 +170,7 @@ class Ball{
             if(ballRect.intersects(blocks.get(i).getBounds())){
                 blocks.remove(i);
                 dy = -dy;
+                GameScreenPanel.score += 10;    // 점수 10점 추가
                 if(block.isYellow()){
                     splitBall(balls);
                 }
@@ -174,20 +194,20 @@ class Ball{
     }
 }
 
-class Paddle{
+class Racket {
     private int x, y, width = 150, height = 30;
 
-    public Paddle(int x, int y){
+    public Racket(int x, int y){
         this.x = x;
         this.y = y;
     }
 
     public void moveLeft(){
-        x = Math.max(0, x - 20);
+        x = Math.max(20, x - 20);
     }
 
     public void moveRight(){
-        x = Math.min(500, x + 20);
+        x = Math.min(BlockBreaker.FRAME_WIDTH - width - 20, x + 20);
     }
 
     public void draw(Graphics g){
@@ -201,12 +221,14 @@ class Paddle{
 }
 
 class Block{
-    private int x, y, width = 50, height = 20;
+    private int x, y, width, height;
     private  boolean isYellow;
 
-    public Block(int x, int y, boolean isYellow ){
+    public Block(int x, int y, int width, int height, boolean isYellow ){
         this.x = x;
         this.y = y;
+        this.width = width;
+        this.height = height;
         this.isYellow = isYellow;
     }
 

@@ -30,8 +30,8 @@ public class GameScreen extends JFrame{
         gameScreenPanel.startGame();
     }
 
-    public void showGameOverScreen(){
-        gameOverScreen = new GameOverScreen(this);
+    public void showGameOverScreen(int score, int highScore){
+        gameOverScreen = new GameOverScreen(score, highScore, this);
         setContentPane(gameOverScreen.getPanel());
         revalidate();
         repaint();
