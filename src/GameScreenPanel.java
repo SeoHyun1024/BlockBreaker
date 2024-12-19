@@ -3,10 +3,12 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.random.*;
 
 public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     private GameScreen gameScreen;
-    private Ball ball;
+    private ArrayList<Ball> balls;
     private Paddle paddle;
     private ArrayList<Block> blocks;
     private boolean running;
@@ -21,12 +23,16 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     }
 
     private void initGameObjects() {
-        ball = new Ball(BlockBreaker.FRAME_WIDTH/2-5, BlockBreaker.FRAME_HEIGHT-40-30-5, -2, -3);
+        balls = new ArrayList<>();
+        balls.add(new Ball(BlockBreaker.FRAME_WIDTH/2-5, BlockBreaker.FRAME_HEIGHT-40-30-5, -2, -3));
         paddle = new Paddle(BlockBreaker.FRAME_WIDTH/2-75, BlockBreaker.FRAME_HEIGHT-40-30);
         blocks = new ArrayList<>();
+        Random random = new Random();
+
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 10; j++) {
-                blocks.add(new Block(5 + j * 55, 5 + i * 25));
+                boolean isYellow = random.nextBoolean();
+                blocks.add(new Block(5 + j * 55, 5 + i * 25, isYellow));
             }
         }
     }
@@ -41,13 +47,17 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     @Override
     public void run() {
         while (running){
-            ball.move();
-            ball.checkCollision(paddle, blocks);
+            for (Ball ball : new ArrayList<>(balls)){
+                ball.move();
+                ball.checkCollision(paddle, blocks, balls);
 
-            if (ball.getY() > getHeight()){
-                System.out.println("getHeight() :" + getHeight());
-                running = false;
-                gameScreen.showGameOverScreen();
+                if (ball.getY() > getHeight()){
+                    balls.remove(ball);
+                    if(balls.isEmpty()){
+                        running = false;
+                        gameScreen.showGameOverScreen();
+                    }
+                }
             }
 
             repaint();
@@ -66,7 +76,9 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
         g.setColor(Color.black);
         g.fillRect(0, 0, getWidth(), getHeight());
 
-        ball.draw(g);
+        for (Ball ball : balls){
+            ball.draw(g);
+        }
         paddle.draw(g);
 
         for (Block block : blocks){
@@ -111,19 +123,28 @@ class Ball{
         if(y < 0 ) dy = -dy;
     }
 
-    public void checkCollision(Paddle paddle, ArrayList<Block> blocks){
+    public void checkCollision(Paddle paddle, ArrayList<Block> blocks, ArrayList<Ball> balls){
         Rectangle ballRect = new Rectangle(x, y, size, size);
         if (ballRect.intersects(paddle.getBounds())) {
             dy = -Math.abs(dy); // Always bounce upward
         }
 
         for (int i = blocks.size() - 1; i >= 0; i--){
+            Block block = blocks.get(i);
             if(ballRect.intersects(blocks.get(i).getBounds())){
                 blocks.remove(i);
                 dy = -dy;
+                if(block.isYellow()){
+                    splitBall(balls);
+                }
                 break;
             }
         }
+    }
+
+    private void splitBall(ArrayList<Ball> balls){
+        balls.add(new Ball(x, y, -dx, dy));
+        balls.add(new Ball(x, y, dx, -dy));
     }
 
     public void draw(Graphics g){
@@ -164,14 +185,20 @@ class Paddle{
 
 class Block{
     private int x, y, width = 50, height = 20;
+    private  boolean isYellow;
 
-    public Block(int x, int y){
+    public Block(int x, int y, boolean isYellow ){
         this.x = x;
         this.y = y;
+        this.isYellow = isYellow;
+    }
+
+    public boolean isYellow(){
+        return isYellow;
     }
 
     public void draw(Graphics g){
-        g.setColor(Color.YELLOW);
+        g.setColor(isYellow ? Color.YELLOW : Color.MAGENTA);
         g.fillRect(x, y, width, height);
     }
 
