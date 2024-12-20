@@ -41,13 +41,13 @@ public class TitleScreen {
                 int titleLine2Width = fm.stringWidth(titleLine2);
 
                 g2.setColor(Color.BLACK);
-                g2.drawString(titleLine1, getWidth()/2 - titleLine1Width/2 + 3,140 + 3 );
-                g2.drawString(titleLine2, getWidth()/2 - titleLine2Width/2 + 3, 200 + 3);
+                g2.drawString(titleLine1, getWidth()/2 - titleLine1Width/2 + 3,167 + 3 );
+                g2.drawString(titleLine2, getWidth()/2 - titleLine2Width/2 + 3, 217 + 3);
 
                 GradientPaint titleGradient = new GradientPaint(getWidth() / 2, 100, new Color(153, 153, 153), getWidth()/2, 155, Color.WHITE);
                 g2.setPaint(titleGradient);
-                g2.drawString(titleLine1, getWidth()/2 - titleLine1Width/2,140 );
-                g2.drawString(titleLine2, getWidth()/2 - titleLine2Width/2, 200);
+                g2.drawString(titleLine1, getWidth()/2 - titleLine1Width/2,167 );
+                g2.drawString(titleLine2, getWidth()/2 - titleLine2Width/2, 217);
 
                 // 게임 제목
                 g2.setFont(new Font("Serif", Font.BOLD, 84));
@@ -83,6 +83,7 @@ public class TitleScreen {
                 }
 
                 drawTreeRow(g2, getWidth(), getHeight() - 250);
+                drawStar(g2);
             }
         };
         p.setFocusable(true);
@@ -137,5 +138,25 @@ public class TitleScreen {
             int treeX = startX + i * (treeWidth + spacing[i]);
             drawTree(g2, treeX, y, heightOffset[i]);
         }
+    }
+
+    private  void drawStar(Graphics2D g2){
+
+        // 별 찍기
+        g2.setColor(new Color(240, 235, 192));
+        g2.fillOval(108, 73, 5, 5);
+        g2.fillOval(215, 108, 5, 5);
+        g2.fillOval(379, 68, 5, 5);
+        g2.fillOval(486, 103, 5, 5);
+        g2.fillOval(569, 33, 5, 5);
+        g2.fillOval(676, 68, 5, 5);
+        g2.fillOval(34, 219, 5, 5);
+        g2.fillOval(188, 255, 5, 5);
+        g2.fillOval(295, 290, 5, 5);
+        g2.fillOval(463, 252, 5, 5);
+        g2.fillOval(305, 214, 5, 5);
+        g2.fillOval(627, 212, 5, 5);
+        g2.fillOval(595, 319, 5, 5);
+        g2.fillOval(734, 247, 5, 5);
     }
 }
