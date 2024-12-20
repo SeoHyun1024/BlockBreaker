@@ -82,7 +82,7 @@ public class TitleScreen {
                     g2.drawString(instructions, (getWidth() - instructionsWidth) / 2, 438);
                 }
 
-                drawTreeRow(g2, getWidth(), getHeight() - 250);
+                drawTreeRow(g2, getWidth(), getHeight() - 230);
                 drawStar(g2);
             }
         };
@@ -106,13 +106,13 @@ public class TitleScreen {
     }
 
     private  void drawTree(Graphics2D g2, int x, int y, int treeHeightOffset){
-        int triangleHeight = 50;
+        int triangleHeight = 48;
         int triangleWidth = 70;
 
         // 삼각형 그리기
         for (int i = 0; i < 4; i++){
             int[] xPoints = {x, x - triangleWidth /2 - i*i*5, x + triangleWidth / 2 + i*i*5};
-            int[] yPoints = {y + (i * triangleHeight ) - 45 - treeHeightOffset, y + (i * triangleHeight + triangleHeight) - treeHeightOffset, y + (i * triangleHeight +triangleHeight - treeHeightOffset )};
+            int[] yPoints = {y + (i * triangleHeight ) - 40 - treeHeightOffset, y + (i * triangleHeight + triangleHeight) - treeHeightOffset, y + (i * triangleHeight +triangleHeight - treeHeightOffset )};
             Polygon triangle = new Polygon(xPoints, yPoints, xPoints.length);
             g2.setColor(Color.WHITE);
             g2.fillPolygon(triangle);
@@ -122,14 +122,14 @@ public class TitleScreen {
         int trunkWidth = 20;
         int trunkHeight = 60;
         g2.setColor(Color.WHITE);
-        g2.fillRect(x - trunkWidth / 2, y + triangleHeight*4 - 50, trunkWidth, trunkHeight + 40);
+        g2.fillRect(x - trunkWidth / 2, y + triangleHeight*4 - 60, trunkWidth, trunkHeight + 40);
     }
 
     private void drawTreeRow(Graphics2D g2, int panelWidth, int y){
         int numTrees = 10;
         int treeWidth = 60;
         int[] spacing = {25, 25, 20, 30, 20, 30, 20, 25, 20, 25 };
-        int[] heightOffset = {5, 40, 10, 30, 5, 35, 0, 45, 10, 20};
+        int[] heightOffset = {5, 40, 10, 30, 0, 35, 0, 55, 10, 20};
 
 
         for (int i = 0; i < numTrees; i++) {
@@ -141,7 +141,6 @@ public class TitleScreen {
     }
 
     private  void drawStar(Graphics2D g2){
-
         // 별 찍기
         g2.setColor(new Color(240, 235, 192));
         g2.fillOval(108, 73, 5, 5);
