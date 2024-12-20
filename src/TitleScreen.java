@@ -3,6 +3,7 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Random;
 
 public class TitleScreen {
     private JPanel p;
@@ -76,11 +77,12 @@ public class TitleScreen {
                     int instructionsWidth = g2.getFontMetrics().stringWidth(instructions);
 
                     g2.setColor(Color.BLACK);
-                    g2.drawString(instructions, (getWidth() - instructionsWidth) / 2 + 2, 468 + 2);
+                    g2.drawString(instructions, (getWidth() - instructionsWidth) / 2 + 2, 438 + 2);
                     g2.setColor(new Color(243, 223, 45));
-                    g2.drawString(instructions, (getWidth() - instructionsWidth) / 2, 468);
+                    g2.drawString(instructions, (getWidth() - instructionsWidth) / 2, 438);
                 }
 
+                drawTreeRow(g2, getWidth(), getHeight() - 250);
             }
         };
         p.setFocusable(true);
@@ -100,5 +102,40 @@ public class TitleScreen {
             p.repaint();
         });
         timer.start();
+    }
+
+    private  void drawTree(Graphics2D g2, int x, int y, int treeHeightOffset){
+        int triangleHeight = 50;
+        int triangleWidth = 70;
+
+        // 삼각형 그리기
+        for (int i = 0; i < 4; i++){
+            int[] xPoints = {x, x - triangleWidth /2 - i*i*5, x + triangleWidth / 2 + i*i*5};
+            int[] yPoints = {y + (i * triangleHeight ) - 45 - treeHeightOffset, y + (i * triangleHeight + triangleHeight) - treeHeightOffset, y + (i * triangleHeight +triangleHeight - treeHeightOffset )};
+            Polygon triangle = new Polygon(xPoints, yPoints, xPoints.length);
+            g2.setColor(Color.WHITE);
+            g2.fillPolygon(triangle);
+        }
+
+        // 나무 기둥 그리기
+        int trunkWidth = 20;
+        int trunkHeight = 60;
+        g2.setColor(Color.WHITE);
+        g2.fillRect(x - trunkWidth / 2, y + triangleHeight*4 - 50, trunkWidth, trunkHeight + 40);
+    }
+
+    private void drawTreeRow(Graphics2D g2, int panelWidth, int y){
+        int numTrees = 10;
+        int treeWidth = 60;
+        int[] spacing = {25, 25, 20, 30, 20, 30, 20, 25, 20, 25 };
+        int[] heightOffset = {5, 40, 10, 30, 5, 35, 0, 45, 10, 20};
+
+
+        for (int i = 0; i < numTrees; i++) {
+            int totalWidth = numTrees * treeWidth + (numTrees - 1) * spacing[i];
+            int startX = (panelWidth - totalWidth) / 2;
+            int treeX = startX + i * (treeWidth + spacing[i]);
+            drawTree(g2, treeX, y, heightOffset[i]);
+        }
     }
 }
