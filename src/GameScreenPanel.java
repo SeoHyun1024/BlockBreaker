@@ -49,6 +49,10 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
                 blocks.add(new Block(x, y, blockWidth, blockHeight, isYellow));
             }
         }
+
+        for (Ball ball : balls){
+            ball.increaseSpeed(level);
+        }
     }
 
     public void startGame(){
@@ -166,6 +170,13 @@ class Ball{
         this.y = y;
         this.dx = dx;
         this.dy = dy;
+    }
+
+    public void increaseSpeed(int level){
+        // 단계가 높아질 수록 속도 증가
+        int speedIncrease = Math.min(level, 5); // 속도 증가량 제한
+        dx = dx > 0 ? 2 + speedIncrease :  -(2 + speedIncrease);
+        dy = dy > 0 ? 3 + speedIncrease :  -(3 + speedIncrease);
     }
 
     public void move(){
