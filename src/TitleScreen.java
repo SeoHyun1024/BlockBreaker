@@ -7,10 +7,12 @@ import java.awt.event.KeyEvent;
 public class TitleScreen {
     private JPanel p;
     private GameScreen gameScreen;
+    private boolean showInstructions = true;
 
     public TitleScreen(GameScreen gameScreen) {
         this.gameScreen = gameScreen;
         initComponents();
+        startBlinking();
     }
 
     public JPanel getPanel(){
@@ -22,7 +24,6 @@ public class TitleScreen {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-
                 Graphics2D g2 = (Graphics2D) g;
 
                 // 배경 그라데이션
@@ -69,14 +70,17 @@ public class TitleScreen {
                 g2.drawString(subtitle, (getWidth() - subtitleWidth) / 2, 326);
 
                 // 설명 text
-                g.setFont(new Font("Arial", Font.PLAIN, 24));
-                String instructions = "Press Spacebar to play!";
-                int instructionsWidth = g2.getFontMetrics().stringWidth(instructions);
+                if (showInstructions) {
+                    g.setFont(new Font("Arial", Font.PLAIN, 24));
+                    String instructions = "Press Spacebar to play!";
+                    int instructionsWidth = g2.getFontMetrics().stringWidth(instructions);
 
-                g2.setColor(Color.BLACK);
-                g2.drawString(instructions, (getWidth() - instructionsWidth) / 2 + 2, 468 + 2);
-                g2.setColor(new Color(243, 223, 45));
-                g2.drawString(instructions, (getWidth() - instructionsWidth) / 2, 468);
+                    g2.setColor(Color.BLACK);
+                    g2.drawString(instructions, (getWidth() - instructionsWidth) / 2 + 2, 468 + 2);
+                    g2.setColor(new Color(243, 223, 45));
+                    g2.drawString(instructions, (getWidth() - instructionsWidth) / 2, 468);
+                }
+
             }
         };
         p.setFocusable(true);
@@ -88,5 +92,13 @@ public class TitleScreen {
                 }
             }
         });
+    }
+
+    private void startBlinking() {
+        Timer timer = new Timer(600, e -> {
+            showInstructions = !showInstructions;
+            p.repaint();
+        });
+        timer.start();
     }
 }
