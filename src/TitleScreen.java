@@ -25,11 +25,11 @@ public class TitleScreen {
                 g.setColor(Color.BLACK);
                 g.fillRect(0, 0, getWidth(), getHeight());
                 g.setColor(Color.WHITE);
-                g.setFont(new Font("Arial", Font.BOLD, 36));
+                g.setFont(new Font("Serif", Font.BOLD, 36));
                 g.drawString("Block Breaker Game", 500, 300);
 
                 g.setColor(Color.RED);
-                g.setFont(new Font("Arial", Font.PLAIN, 24));
+                g.setFont(new Font("Serif", Font.PLAIN, 24));
                 g.drawString("Press Spacebar to play!!", 150, 250);
             }
         };

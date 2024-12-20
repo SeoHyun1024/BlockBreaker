@@ -37,7 +37,7 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
         int rows = level * 3;
         int cols = level * 3;
 
-        int padding = 3;
+        int padding = 6;
         int blockWidth = (BlockBreaker.FRAME_WIDTH - cols * padding - 40 )/cols;
         int blockHeight = ((BlockBreaker.FRAME_HEIGHT / 3) - 2 * padding)/rows;
 
@@ -97,16 +97,33 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     protected  void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        g.setColor(Color.black);
+        Graphics2D g2 = (Graphics2D) g;
+
+        // 배경 그라데이션
+        GradientPaint background = new GradientPaint(0, 0, new Color(11, 12, 32), 0, getHeight(), new Color(108, 111, 135));
+        g2.setPaint(background);
         g.fillRect(0, 0, getWidth(), getHeight());
 
-        // 좌우 벽 그리기
-        g.setColor(Color.GREEN);
-        g.fillRect(0, 0, 20, getHeight());  // 좌측 벽
-        g.fillRect(getWidth() - 20, 0, 20, getHeight());    // 우측 벽
+        // 좌측 벽 그리기
+        g.setColor(new Color(66, 25, 11));
+        g.fillRect(0, 0, 20, getHeight());
+        g2.setStroke(new BasicStroke(3));
+        g2.setPaint(new GradientPaint(0, 0, new Color(249, 198, 181), 20, getHeight(), new Color(61, 59, 59)));
+        g2.drawRect(0, 0, 20, getHeight());
+
+        // 우측 벽 그리기
+        g.setColor(new Color(66, 25, 11));
+        g.fillRect(getWidth() - 20, 0, 20, getHeight());
+        g2.setStroke(new BasicStroke(3));
+        g2.setPaint(new GradientPaint(0, 0, new Color(249, 198, 181), 20, getHeight(), new Color(61, 59, 59)));
+        g2.drawRect(getWidth() - 20, 0, 20, getHeight());
 
         // 상단 벽 그리기
+        g.setColor(new Color(66, 25, 11));
         g.fillRect(0, 0, getWidth(), 20);
+        g2.setStroke(new BasicStroke(3));
+        g2.setPaint(new GradientPaint(0, 0, new Color(249, 198, 181), 20, getHeight(), new Color(61, 59, 59)));
+        g2.drawRect(0, 0, getWidth(), 20);
 
         // 벽돌 그리기
         for (Ball ball : balls){
@@ -114,11 +131,11 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
         }
 
         // 패들 그리기
-        racket.draw(g);
+        racket.draw((Graphics2D) g);
 
         // 블럭 그리기
         for (Block block : blocks){
-            block.draw(g);
+            block.draw((Graphics2D) g);
         }
     }
 
@@ -210,9 +227,14 @@ class Racket {
         x = Math.min(BlockBreaker.FRAME_WIDTH - width - 20, x + 20);
     }
 
-    public void draw(Graphics g){
-        g.setColor(Color.PINK);
+    public void draw(Graphics2D g){
+        g.setColor(new Color(113, 160, 95));
         g.fillRect(x, y, width, height);
+
+        GradientPaint gradient = new GradientPaint(x + width/2, y, new Color(175,232, 208), x + width/2, y + height, new Color(22,84, 58));
+        g.setPaint(gradient);
+        g.setStroke(new BasicStroke(3));
+        g.drawRect(x, y, width, height);
     }
 
     public Rectangle getBounds(){
@@ -236,9 +258,16 @@ class Block{
         return isYellow;
     }
 
-    public void draw(Graphics g){
-        g.setColor(isYellow ? Color.YELLOW : Color.MAGENTA);
+    public void draw(Graphics2D g) {
+        // Draw paddle
+        g.setColor(isYellow ? new Color(179, 96, 58) : new Color(158, 56, 38));
         g.fillRect(x, y, width, height);
+
+        // Draw gradient border
+        GradientPaint gradient = new GradientPaint(x + width/2, y, new Color(255,141, 117), x + width/2, y + height, new Color(123,23, 7));
+        g.setPaint(gradient);
+        g.setStroke(new BasicStroke(3));
+        g.drawRect(x, y, width, height);
     }
 
     public Rectangle getBounds(){
