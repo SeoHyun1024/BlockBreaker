@@ -6,10 +6,12 @@ import java.awt.event.KeyEvent;
 public class GameOverScreen extends JPanel{
     private JPanel p;
     private GameScreen gameScreen;
+    private boolean showInstructions = true;
 
     public GameOverScreen(int score, int highScore, GameScreen gameScreen) {
         this.gameScreen = gameScreen;
         initComponents(score, highScore);
+        startBlinking();
     }
 
     public JPanel getPanel() {
@@ -53,14 +55,17 @@ public class GameOverScreen extends JPanel{
               g2.drawString(scoreText, (getWidth() - scoreWidth) / 2, 386);
 
               // 재시작 문구
-              g.setFont(new Font("Arial", Font.PLAIN, 24));
-              String instructions = "Press Spacebar to Restart!";
-              int instructionsWidth = g2.getFontMetrics().stringWidth(instructions);
+              if (showInstructions) {
+                  g.setFont(new Font("Arial", Font.PLAIN, 24));
+                  String instructions = "Press Spacebar to Restart!";
+                  int instructionsWidth = g2.getFontMetrics().stringWidth(instructions);
 
-              g2.setColor(Color.BLACK);
-              g2.drawString(instructions, (getWidth() - instructionsWidth) / 2 + 2, 438 + 2);
-              g2.setColor(new Color(243, 223, 45));
-              g2.drawString(instructions, (getWidth() - instructionsWidth) / 2, 438);
+                  g2.setColor(Color.BLACK);
+                  g2.drawString(instructions, (getWidth() - instructionsWidth) / 2 + 2, 438 + 2);
+                  g2.setColor(new Color(243, 223, 45));
+                  g2.drawString(instructions, (getWidth() - instructionsWidth) / 2, 438);
+
+              }
 
               drawTreeRow(g2, getWidth(), getHeight() - 230);
               drawStar(g2);
@@ -75,6 +80,14 @@ public class GameOverScreen extends JPanel{
                 }
             }
         });
+    }
+
+    private void startBlinking() {
+        Timer timer = new Timer(600, e -> {
+            showInstructions = !showInstructions;
+            p.repaint();
+        });
+        timer.start();
     }
 
     private  void drawTree(Graphics2D g2, int x, int y, int treeHeightOffset){
