@@ -4,22 +4,30 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 public class GameOverScreen extends JPanel{
-    private JPanel p;
+    private int score;
+    private int highScore;
     private GameScreen gameScreen;
     private boolean showInstructions = true;
 
     public GameOverScreen(int score, int highScore, GameScreen gameScreen) {
         this.gameScreen = gameScreen;
-        initComponents(score, highScore);
+        this.score = score;
+        this.highScore = highScore;
+
+        setFocusable(true);
+        requestFocusInWindow();
+        addKeyListener(new KeyAdapter() { // KeyListener 추가
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    gameScreen.showTitleScreen(); // 스페이스바를 누르면 타이틀 화면으로
+                }
+            }
+        });
+
         startBlinking();
     }
 
-    public JPanel getPanel() {
-        return p;
-    }
-
-    public void initComponents(int score, int highScore) {
-        p = new JPanel(){
           @Override
           protected void paintComponent(Graphics g) {
               super.paintComponent(g);
@@ -70,22 +78,11 @@ public class GameOverScreen extends JPanel{
               drawTreeRow(g2, getWidth(), getHeight() - 230);
               drawStar(g2);
           }
-        };
-        p.setFocusable(true);
-        p.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode() == KeyEvent.VK_SPACE){
-                    gameScreen.showTitleScreen();
-                }
-            }
-        });
-    }
 
     private void startBlinking() {
         Timer timer = new Timer(600, e -> {
             showInstructions = !showInstructions;
-            p.repaint();
+            repaint();
         });
         timer.start();
     }

@@ -22,6 +22,8 @@ public class GameScreen extends JFrame{
         setContentPane(titleScreen.getPanel());
         revalidate();
         repaint();
+
+        titleScreen.getPanel().requestFocusInWindow();
     }
 
     public void showGameScreen(){
@@ -29,12 +31,15 @@ public class GameScreen extends JFrame{
         setContentPane(gameScreenPanel);
         repaint();
         gameScreenPanel.startGame();
+
+        gameScreenPanel.requestFocusInWindow();
     }
 
     public void showGameOverScreen(int score, int highScore){
         gameOverScreen = new GameOverScreen(score, highScore, this);
-        setContentPane(gameOverScreen.getPanel());
+        setContentPane(gameOverScreen);
         revalidate();
         repaint();
+        gameOverScreen.requestFocusInWindow();
     }
 }
