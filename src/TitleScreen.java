@@ -1,17 +1,24 @@
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.net.URL;
 
 public class TitleScreen {
     private JPanel p;
     private GameScreen gameScreen;
     private boolean showInstructions = true;
+    private Clip  backgroundClip;
 
     public TitleScreen(GameScreen gameScreen) {
         this.gameScreen = gameScreen;
         initComponents();
         startBlinking();
+        playBackgroundMusic("title_background.wav");
     }
 
     public JPanel getPanel(){
@@ -89,6 +96,7 @@ public class TitleScreen {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    stopBackgroundMusic();
                     gameScreen.showGameScreen();
                 }
             }
@@ -96,11 +104,33 @@ public class TitleScreen {
     }
 
     private void startBlinking() {
-        Timer timer = new Timer(600, e -> {
+        Timer timer = new Timer(300, e -> {
             showInstructions = !showInstructions;
             p.repaint();
         });
         timer.start();
+    }
+
+    private void playBackgroundMusic(String fileName) {
+        try {
+            URL url = getClass().getClassLoader().getResource(fileName);
+            if (url == null) {
+                throw new RuntimeException("Audio file not found: " + fileName);
+            }
+            AudioInputStream audio = AudioSystem.getAudioInputStream(url);
+            backgroundClip = AudioSystem.getClip();
+            backgroundClip.open(audio);
+            backgroundClip.loop(Clip.LOOP_CONTINUOUSLY); // Loop the music
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void stopBackgroundMusic() {
+        if (backgroundClip != null && backgroundClip.isRunning()) {
+            backgroundClip.stop();
+            backgroundClip.close();
+        }
     }
 
     private  void drawTree(Graphics2D g2, int x, int y, int treeHeightOffset){
