@@ -4,7 +4,8 @@ import java.util.ArrayList;
 abstract class Block {
     protected int x, y, width, height;
     protected Color fillColor;
-    protected Color borderColor;
+    protected Color borderColor1;
+    protected Color borderColor2;
     protected int points;
     protected boolean destroyed;
 
@@ -27,9 +28,9 @@ abstract class Block {
         g.fillRect(x, y, width, height);
 
         GradientPaint gradient = new GradientPaint(
-                x + width/2, y, borderColor,
+                x + width/2, y, borderColor1,
                 x + width/2, y + height,
-                borderColor.darker()
+                borderColor2
         );
         g.setPaint(gradient);
         g.setStroke(new BasicStroke(3));
@@ -61,7 +62,8 @@ class NormalBlock extends Block {
     @Override
     protected void initializeColors() {
         fillColor = new Color(158, 56, 38);
-        borderColor = new Color(255, 141, 117);
+        borderColor1 = new Color(255, 141, 117);
+        borderColor2 =  new Color(123,23, 7);
     }
 
     @Override
@@ -84,7 +86,8 @@ class SplitterBlock extends Block {
     @Override
     protected void initializeColors() {
         fillColor = new Color(179, 96, 58);
-        borderColor = new Color(255, 141, 117);
+        borderColor1 = new Color(255, 141, 117);
+        borderColor2 =  new Color(123, 23, 7);
     }
 
     @Override
@@ -126,7 +129,8 @@ class MetalBlock extends Block {
     @Override
     protected void initializeColors() {
         fillColor = new Color(128, 128, 128);
-        borderColor = new Color(192, 192, 192);
+        borderColor1 = new Color(192, 192, 192);
+        borderColor2 =  new Color(54, 52, 52);
     }
 
     @Override
@@ -141,7 +145,7 @@ class MetalBlock extends Block {
             destroy();
             SoundManager.playSound("block.wav");
         } else {
-            SoundManager.playSound("metal_hit.wav");
+            SoundManager.playSound("metal.wav");
             // Darken the block color to show damage
             fillColor = fillColor.darker();
         }

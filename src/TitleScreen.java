@@ -5,24 +5,38 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class TitleScreen {
     private JPanel p;
     private GameScreen gameScreen;
     private boolean showInstructions = true;
     private Clip  backgroundClip;
+    private ArrayList<Star> stars;
 
     public TitleScreen(GameScreen gameScreen) {
         this.gameScreen = gameScreen;
         initComponents();
         startBlinking();
         playBackgroundMusic("title_background.wav");
+        stars = new ArrayList<>();
+        initStars(); // Initialize stars
+        startStarAnimation();
     }
 
     public JPanel getPanel(){
         return p;
+    }
+
+    private void initStars() {
+        for (int i = 0; i < 20; i++) {
+            int x = (int) (Math.random() * 800);
+            int y = (int) (Math.random() * 600);
+            int speed = 1 + (int) (Math.random() * 3); // Random speed between 1 and 3
+            stars.add(new Star(x, y, speed));
+        }
     }
 
     private void initComponents() {
@@ -36,6 +50,11 @@ public class TitleScreen {
                 GradientPaint background = new GradientPaint(0, 0, new Color(11, 12, 32), 0, getHeight(), new Color(108, 111, 135));
                 g2.setPaint(background);
                 g.fillRect(0, 0, getWidth(), getHeight());
+
+                // 별 그리기
+                for (Star star : stars) {
+                    star.draw(g2);
+                }
 
                 // 과제 제목
                 g2.setFont(new Font("Arial", Font.PLAIN, 48));
@@ -88,7 +107,7 @@ public class TitleScreen {
                 }
 
                 drawTreeRow(g2, getWidth(), getHeight() - 230);
-                drawStar(g2);
+                //drawStar(g2);
             }
         };
         p.setFocusable(true);
@@ -168,22 +187,36 @@ public class TitleScreen {
         }
     }
 
-    private  void drawStar(Graphics2D g2){
-        // 별 찍기
-        g2.setColor(new Color(240, 235, 192));
-        g2.fillOval(108, 73, 5, 5);
-        g2.fillOval(215, 108, 5, 5);
-        g2.fillOval(379, 68, 5, 5);
-        g2.fillOval(486, 103, 5, 5);
-        g2.fillOval(569, 33, 5, 5);
-        g2.fillOval(676, 68, 5, 5);
-        g2.fillOval(34, 219, 5, 5);
-        g2.fillOval(188, 255, 5, 5);
-        g2.fillOval(295, 290, 5, 5);
-        g2.fillOval(463, 252, 5, 5);
-        g2.fillOval(305, 214, 5, 5);
-        g2.fillOval(627, 212, 5, 5);
-        g2.fillOval(595, 319, 5, 5);
-        g2.fillOval(734, 247, 5, 5);
+    private void startStarAnimation() {
+        Timer timer = new Timer(50, e -> {
+            for (Star star : stars) {
+                star.move();
+            }
+            p.repaint();
+        });
+        timer.start();
+    }
+}
+
+class Star {
+    private int x, y, speed;
+
+    public Star(int x, int y, int speed) {
+        this.x = x;
+        this.y = y;
+        this.speed = speed;
+    }
+
+    public void move() {
+        y += speed;
+        if (y > 600) { // Reset position if it moves off-screen
+            y = 0;
+            x = new Random().nextInt(800);
+        }
+    }
+
+    public void draw(Graphics2D g) {
+        g.setColor(new Color(240, 235, 192));
+        g.fillOval(x, y, 5, 5);
     }
 }

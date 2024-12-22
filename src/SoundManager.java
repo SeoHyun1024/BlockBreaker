@@ -17,6 +17,7 @@ public class SoundManager {
         loadSound("racket.wav");
         loadSound("block.wav");
         loadSound("block_yellow.wav");
+        loadSound("metal.wav");
     }
 
     private static synchronized void loadSound(String fileName) {

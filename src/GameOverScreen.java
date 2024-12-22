@@ -6,12 +6,14 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class GameOverScreen extends JPanel{
     private int score;
     private int highScore;
     private GameScreen gameScreen;
     private boolean showInstructions = true;
+    private ArrayList<Star> stars;
 
     public GameOverScreen(int score, int highScore, GameScreen gameScreen) {
         this.gameScreen = gameScreen;
@@ -31,58 +33,74 @@ public class GameOverScreen extends JPanel{
 
         playSoundEffect("game_over.wav");
         startBlinking();
+        stars = new ArrayList<>();
+        initStars(); // Initialize stars
+        startStarAnimation();
     }
 
-          @Override
-          protected void paintComponent(Graphics g) {
-              super.paintComponent(g);
-              Graphics2D g2 = (Graphics2D) g;
+    private void initStars() {
+        for (int i = 0; i < 20; i++) {
+            int x = (int) (Math.random() * 800);
+            int y = (int) (Math.random() * 600);
+            int speed = 1 + (int) (Math.random() * 3); // Random speed between 1 and 3
+            stars.add(new Star(x, y, speed));
+        }
+    }
 
-              // 배경 그라데이션
-              GradientPaint background = new GradientPaint(0, 0, new Color(11, 12, 32), 0, getHeight(), new Color(108, 111, 135));
-              g2.setPaint(background);
-              g.fillRect(0, 0, getWidth(), getHeight());
+    @Override
+    protected void paintComponent(Graphics g) {
+      super.paintComponent(g);
+      Graphics2D g2 = (Graphics2D) g;
 
-              // 게임 오버 문구
-              g.setFont(new Font("Arial", Font.PLAIN, 80));
-              String title = "Game Over";
-              FontMetrics fm = g2.getFontMetrics();
-              int titleWidth = fm.stringWidth(title);
+      // 배경 그라데이션
+      GradientPaint background = new GradientPaint(0, 0, new Color(11, 12, 32), 0, getHeight(), new Color(108, 111, 135));
+      g2.setPaint(background);
+      g.fillRect(0, 0, getWidth(), getHeight());
 
-              g.setColor(Color.WHITE);
-              g2.drawString(title, (getWidth() - titleWidth) / 2, 196);
+      // 별 그리기
+      for (Star star : stars) {
+          star.draw(g2);
+      }
 
-              // 점수 표시
-              g.setFont(new Font("Arial", Font.PLAIN, 38));
-              String scoreText = "Your Score: " + score;
-              int scoreWidth = g2.getFontMetrics().stringWidth(scoreText);
-              String highScoreText = "High Score: " + highScore;
-              int highScoreWidth = g2.getFontMetrics().stringWidth(highScoreText);
+      // 게임 오버 문구
+      g.setFont(new Font("Arial", Font.PLAIN, 80));
+      String title = "Game Over";
+      FontMetrics fm = g2.getFontMetrics();
+      int titleWidth = fm.stringWidth(title);
 
-              g2.setColor(new Color(255, 0, 0));
-              g2.drawString(highScoreText, (getWidth() - highScoreWidth) / 2 + 3, 336 + 3);
-              g2.drawString(scoreText, (getWidth() - scoreWidth) / 2 + 3, 386 + 3);
+      g.setColor(Color.WHITE);
+      g2.drawString(title, (getWidth() - titleWidth) / 2, 196);
 
-              g2.setColor(new Color(226, 211, 180));
-              g2.drawString(highScoreText, (getWidth() - highScoreWidth) / 2, 336);
-              g2.drawString(scoreText, (getWidth() - scoreWidth) / 2, 386);
+      // 점수 표시
+      g.setFont(new Font("Arial", Font.PLAIN, 38));
+      String scoreText = "Your Score: " + score;
+      int scoreWidth = g2.getFontMetrics().stringWidth(scoreText);
+      String highScoreText = "High Score: " + highScore;
+      int highScoreWidth = g2.getFontMetrics().stringWidth(highScoreText);
 
-              // 재시작 문구
-              if (showInstructions) {
-                  g.setFont(new Font("Arial", Font.PLAIN, 24));
-                  String instructions = "Press Spacebar to Restart!";
-                  int instructionsWidth = g2.getFontMetrics().stringWidth(instructions);
+      g2.setColor(new Color(255, 0, 0));
+      g2.drawString(highScoreText, (getWidth() - highScoreWidth) / 2 + 3, 336 + 3);
+      g2.drawString(scoreText, (getWidth() - scoreWidth) / 2 + 3, 386 + 3);
 
-                  g2.setColor(Color.BLACK);
-                  g2.drawString(instructions, (getWidth() - instructionsWidth) / 2 + 2, 438 + 2);
-                  g2.setColor(new Color(243, 223, 45));
-                  g2.drawString(instructions, (getWidth() - instructionsWidth) / 2, 438);
+      g2.setColor(new Color(226, 211, 180));
+      g2.drawString(highScoreText, (getWidth() - highScoreWidth) / 2, 336);
+      g2.drawString(scoreText, (getWidth() - scoreWidth) / 2, 386);
 
-              }
+      // 재시작 문구
+      if (showInstructions) {
+          g.setFont(new Font("Arial", Font.PLAIN, 24));
+          String instructions = "Press Spacebar to Restart!";
+          int instructionsWidth = g2.getFontMetrics().stringWidth(instructions);
 
-              drawTreeRow(g2, getWidth(), getHeight() - 230);
-              drawStar(g2);
-          }
+          g2.setColor(Color.BLACK);
+          g2.drawString(instructions, (getWidth() - instructionsWidth) / 2 + 2, 438 + 2);
+          g2.setColor(new Color(243, 223, 45));
+          g2.drawString(instructions, (getWidth() - instructionsWidth) / 2, 438);
+
+      }
+
+      drawTreeRow(g2, getWidth(), getHeight() - 230);
+    }
 
     private void startBlinking() {
         Timer timer = new Timer(600, e -> {
@@ -127,25 +145,6 @@ public class GameOverScreen extends JPanel{
         }
     }
 
-    private  void drawStar(Graphics2D g2){
-        // 별 찍기
-        g2.setColor(new Color(240, 235, 192));
-        g2.fillOval(108, 73, 5, 5);
-        g2.fillOval(215, 108, 5, 5);
-        g2.fillOval(379, 68, 5, 5);
-        g2.fillOval(486, 103, 5, 5);
-        g2.fillOval(569, 33, 5, 5);
-        g2.fillOval(676, 68, 5, 5);
-        g2.fillOval(34, 219, 5, 5);
-        g2.fillOval(188, 255, 5, 5);
-        g2.fillOval(295, 290, 5, 5);
-        g2.fillOval(463, 252, 5, 5);
-        g2.fillOval(305, 214, 5, 5);
-        g2.fillOval(627, 212, 5, 5);
-        g2.fillOval(595, 319, 5, 5);
-        g2.fillOval(734, 247, 5, 5);
-    }
-
     private void playSoundEffect(String fileName) {
         try {
             URL url = getClass().getClassLoader().getResource(fileName);
@@ -159,5 +158,15 @@ public class GameOverScreen extends JPanel{
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void startStarAnimation() {
+        Timer timer = new Timer(50, e -> {
+            for (Star star : stars) {
+                star.move();
+            }
+            repaint();
+        });
+        timer.start();
     }
 }

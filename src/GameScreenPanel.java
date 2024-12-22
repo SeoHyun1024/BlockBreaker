@@ -32,7 +32,7 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     private void initGameObjects() {
         balls = new ArrayList<>();
         balls.add(new Ball(Main.FRAME_WIDTH/2-5, Main.FRAME_HEIGHT-40-30-15, -2, -3));
-        racket = new Racket(Main.FRAME_WIDTH/2-75, Main.FRAME_HEIGHT-40-30);
+        racket = new Racket(Main.FRAME_WIDTH/2-75, Main.FRAME_HEIGHT-70-30);
 
         playSoundEffect("game_start.wav");
         generateBlocks();    // 블럭 생성
@@ -105,6 +105,11 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
 
             if (blocks.isEmpty()){
                 level++;
+                try{
+                    Thread.sleep(600);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 generateBlocks();
                 balls.clear();
                 balls.add(new Ball(Main.FRAME_WIDTH/2-5, Main.FRAME_HEIGHT-40-30-5, -2, -3));
@@ -184,11 +189,13 @@ class Ball{
         return dy;
     }
 
-    public void increaseSpeed(int level){
-        // 단계가 높아질 수록 속도 증가
-        int speedIncrease = Math.min(level, 5); // 속도 증가량 제한
-        dx = dx > 0 ? 2 + speedIncrease :  -(2 + speedIncrease);
-        dy = dy > 0 ? 3 + speedIncrease :  -(3 + speedIncrease);
+    public void increaseSpeed(int level) {
+        // 단계가 높아질수록 속도 증가
+        int baseSpeed = 1;
+        int speedMultiplier = Math.max(1, level * 2); // 속도 증가량을 단계별로 크게 증가
+        dx = dx > 0 ? baseSpeed + speedMultiplier : -(baseSpeed + speedMultiplier);
+        dy = dy > 0 ? baseSpeed + speedMultiplier : -(baseSpeed + speedMultiplier);
+        System.out.println(speedMultiplier);
     }
 
     public void move(){
@@ -229,11 +236,6 @@ class Ball{
                 break;
             }
         }
-    }
-
-    private void splitBall(ArrayList<Ball> balls){
-        balls.add(new Ball(x, y, -dx, dy));
-        balls.add(new Ball(x, y, dx, -dy));
     }
 
     public void draw(Graphics g){
@@ -281,35 +283,3 @@ class Racket {
     }
 }
 
-//class Block{
-//    private int x, y, width, height;
-//    private  boolean isYellow;
-//
-//    public Block(int x, int y, int width, int height, boolean isYellow ){
-//        this.x = x;
-//        this.y = y;
-//        this.width = width;
-//        this.height = height;
-//        this.isYellow = isYellow;
-//    }
-//
-//    public boolean isYellow(){
-//        return isYellow;
-//    }
-//
-//    public void draw(Graphics2D g) {
-//        // Draw paddle
-//        g.setColor(isYellow ? new Color(179, 96, 58) : new Color(158, 56, 38));
-//        g.fillRect(x, y, width, height);
-//
-//        // Draw gradient border
-//        GradientPaint gradient = new GradientPaint(x + width/2, y, new Color(255,141, 117), x + width/2, y + height, new Color(123,23, 7));
-//        g.setPaint(gradient);
-//        g.setStroke(new BasicStroke(3));
-//        g.drawRect(x, y, width, height);
-//    }
-//
-//    public Rectangle getBounds(){
-//        return new Rectangle(x, y, width, height);
-//    }
-//}
