@@ -20,10 +20,10 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
 
     public GameScreenPanel(GameScreen gameScreen) {
         this.gameScreen = gameScreen;
-        renderManager = new RenderManager(BlockBreaker.FRAME_WIDTH, BlockBreaker.FRAME_HEIGHT);
+        renderManager = new RenderManager(Main.FRAME_WIDTH, Main.FRAME_HEIGHT);
         setFocusable(true);
         addKeyListener(this);
-        setSize(BlockBreaker.FRAME_WIDTH,BlockBreaker.FRAME_HEIGHT);
+        setSize(Main.FRAME_WIDTH, Main.FRAME_HEIGHT);
         requestFocusInWindow();
         initGameObjects();
         SoundManager.init();
@@ -31,8 +31,8 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
 
     private void initGameObjects() {
         balls = new ArrayList<>();
-        balls.add(new Ball(BlockBreaker.FRAME_WIDTH/2-5, BlockBreaker.FRAME_HEIGHT-40-30-15, -2, -3));
-        racket = new Racket(BlockBreaker.FRAME_WIDTH/2-75, BlockBreaker.FRAME_HEIGHT-40-30);
+        balls.add(new Ball(Main.FRAME_WIDTH/2-5, Main.FRAME_HEIGHT-40-30-15, -2, -3));
+        racket = new Racket(Main.FRAME_WIDTH/2-75, Main.FRAME_HEIGHT-40-30);
 
         playSoundEffect("game_start.wav");
         generateBlocks();    // 블럭 생성
@@ -43,34 +43,32 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
         int rows = level * 3;
         int cols = level * 3;
         int totalBlocks = rows * cols;
-        int maxYellowBlocks = totalBlocks / 3;  // 전체 블록의 1/3로 제한
-        int currentYellowBlocks = 0;
-        Random random = new Random();  // Random 객체를 한 번만 생성
+        int maxSpecialBlocks = totalBlocks / 3;  // 특수 블록(Splitter, Metal) 최대 개수
+        int currentSpecialBlocks = 0;
+        Random random = new Random();
 
         int padding = 6;
-        int blockWidth = (BlockBreaker.FRAME_WIDTH - cols * padding - 40) / cols;
-        int blockHeight = ((BlockBreaker.FRAME_HEIGHT / 3) - 2 * padding) / rows;
+        int blockWidth = (Main.FRAME_WIDTH - cols * padding - 40) / cols;
+        int blockHeight = ((Main.FRAME_HEIGHT / 3) - 2 * padding) / rows;
 
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
                 int x = 20 + padding + col * (blockWidth + padding);
                 int y = 20 + row * (blockHeight + padding) + padding;
 
-                // 노란색 블록 생성 여부 결정
-                boolean isYellow = false;
-                if (currentYellowBlocks < maxYellowBlocks) {
-                    // 남은 블록 수를 고려하여 확률 조정
-                    int remainingBlocks = totalBlocks - (row * cols + col);
-                    int remainingNeededYellow = maxYellowBlocks - currentYellowBlocks;
-                    float yellowProbability = (float) remainingNeededYellow / remainingBlocks;
-
-                    if (random.nextFloat() < yellowProbability) {
-                        isYellow = true;
-                        currentYellowBlocks++;
+                Block block;
+                if (currentSpecialBlocks < maxSpecialBlocks && random.nextFloat() < 0.3) {
+                    // 30% 확률로 특수 블록 생성
+                    if (random.nextBoolean()) {
+                        block = new SplitterBlock(x, y, blockWidth, blockHeight);
+                    } else {
+                        block = new MetalBlock(x, y, blockWidth, blockHeight);
                     }
+                    currentSpecialBlocks++;
+                } else {
+                    block = new NormalBlock(x, y, blockWidth, blockHeight);
                 }
-
-                blocks.add(new Block(x, y, blockWidth, blockHeight, isYellow));
+                blocks.add(block);
             }
         }
 
@@ -109,7 +107,7 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
                 level++;
                 generateBlocks();
                 balls.clear();
-                balls.add(new Ball(BlockBreaker.FRAME_WIDTH/2-5, BlockBreaker.FRAME_HEIGHT-40-30-5, -2, -3));
+                balls.add(new Ball(Main.FRAME_WIDTH/2-5, Main.FRAME_HEIGHT-40-30-5, -2, -3));
                 playSoundEffect("game_start.wav");
             }
 
@@ -174,6 +172,18 @@ class Ball{
         this.dy = dy;
     }
 
+    public int getX() {
+        return x;
+    }
+
+    public int getDx() {
+        return dx;
+    }
+
+    public int getDy() {
+        return dy;
+    }
+
     public void increaseSpeed(int level){
         // 단계가 높아질 수록 속도 증가
         int speedIncrease = Math.min(level, 5); // 속도 증가량 제한
@@ -185,29 +195,37 @@ class Ball{
         x += dx;
         y += dy;
 
-        if (x < 20 || x > BlockBreaker.FRAME_WIDTH - size -20) dx = -dx;
+        if (x < 20 || x > Main.FRAME_WIDTH - size -20) dx = -dx;
         if(y < 20 ) dy = -dy;
     }
 
-    public void checkCollision(Racket racket, ArrayList<Block> blocks, ArrayList<Ball> balls){
+    public void checkCollision(Racket racket, ArrayList<Block> blocks, ArrayList<Ball> balls) {
+        // 라켓과의 충돌 검사
         Rectangle ballRect = new Rectangle(x, y, size, size);
         if (ballRect.intersects(racket.getBounds())) {
-            playSoundEffect("racket.wav");  // 라켓에 튕겨져나가는 효과음
-            dy = -Math.abs(dy); // Always bounce upward
+            playSoundEffect("racket.wav");
+            dy = -Math.abs(dy); // 항상 위쪽으로 튕기도록 설정
         }
 
-        for (int i = blocks.size() - 1; i >= 0; i--){
-            Block block = blocks.get(i);
-            String sound_effect = block.isYellow() ? "block_yellow.wav" : "block.wav";
-            if(ballRect.intersects(blocks.get(i).getBounds())){
-                blocks.remove(i);
+        // 블록과의 충돌 검사
+        for (int i = blocks.size() - 1; i >= 0; i--) {
+            Block block = (Block) blocks.get(i);
+            if (ballRect.intersects(block.getBounds())) {
+                // 블록의 고유한 충돌 처리 로직 실행
+                block.handleCollision(balls);
 
-                playSoundEffect(sound_effect);  // 블럭 부딪히는 효과음
+                // 점수 추가
+                GameScreenPanel.score += block.getPoints();
+
+                // 공의 방향 전환
                 dy = -dy;
-                GameScreenPanel.score += 10;    // 점수 10점 추가
-                if(block.isYellow()){
-                    splitBall(balls);
+
+                // 블록이 파괴되었다면 제거
+                if (block.isDestroyed()) {
+                    blocks.remove(i);
                 }
+
+                // 첫 번째 충돌 후 루프 종료
                 break;
             }
         }
@@ -245,7 +263,7 @@ class Racket {
     }
 
     public void moveRight(){
-        x = Math.min(BlockBreaker.FRAME_WIDTH - width - 20, x + 5);
+        x = Math.min(Main.FRAME_WIDTH - width - 20, x + 5);
     }
 
     public void draw(Graphics2D g){
@@ -263,35 +281,35 @@ class Racket {
     }
 }
 
-class Block{
-    private int x, y, width, height;
-    private  boolean isYellow;
-
-    public Block(int x, int y, int width, int height, boolean isYellow ){
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.isYellow = isYellow;
-    }
-
-    public boolean isYellow(){
-        return isYellow;
-    }
-
-    public void draw(Graphics2D g) {
-        // Draw paddle
-        g.setColor(isYellow ? new Color(179, 96, 58) : new Color(158, 56, 38));
-        g.fillRect(x, y, width, height);
-
-        // Draw gradient border
-        GradientPaint gradient = new GradientPaint(x + width/2, y, new Color(255,141, 117), x + width/2, y + height, new Color(123,23, 7));
-        g.setPaint(gradient);
-        g.setStroke(new BasicStroke(3));
-        g.drawRect(x, y, width, height);
-    }
-
-    public Rectangle getBounds(){
-        return new Rectangle(x, y, width, height);
-    }
-}
+//class Block{
+//    private int x, y, width, height;
+//    private  boolean isYellow;
+//
+//    public Block(int x, int y, int width, int height, boolean isYellow ){
+//        this.x = x;
+//        this.y = y;
+//        this.width = width;
+//        this.height = height;
+//        this.isYellow = isYellow;
+//    }
+//
+//    public boolean isYellow(){
+//        return isYellow;
+//    }
+//
+//    public void draw(Graphics2D g) {
+//        // Draw paddle
+//        g.setColor(isYellow ? new Color(179, 96, 58) : new Color(158, 56, 38));
+//        g.fillRect(x, y, width, height);
+//
+//        // Draw gradient border
+//        GradientPaint gradient = new GradientPaint(x + width/2, y, new Color(255,141, 117), x + width/2, y + height, new Color(123,23, 7));
+//        g.setPaint(gradient);
+//        g.setStroke(new BasicStroke(3));
+//        g.drawRect(x, y, width, height);
+//    }
+//
+//    public Rectangle getBounds(){
+//        return new Rectangle(x, y, width, height);
+//    }
+//}

@@ -1,6 +1,6 @@
 import javax.swing.*;
 
-public class BlockBreaker {
+public class Main {
     static int FRAME_WIDTH = 800;
     static int FRAME_HEIGHT = 800;
 

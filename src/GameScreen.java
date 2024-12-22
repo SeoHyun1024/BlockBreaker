@@ -1,5 +1,4 @@
 import javax.swing.*;
-import java.awt.*;
 
 public class GameScreen extends JFrame{
 
@@ -9,7 +8,7 @@ public class GameScreen extends JFrame{
 
     public GameScreen() {
         setTitle("BlockBreaker Game");
-        setSize(BlockBreaker.FRAME_WIDTH, BlockBreaker.FRAME_HEIGHT);
+        setSize(Main.FRAME_WIDTH, Main.FRAME_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         setVisible(true);
