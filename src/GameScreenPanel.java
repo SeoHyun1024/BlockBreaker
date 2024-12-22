@@ -1,7 +1,11 @@
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -26,10 +30,11 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
 
     private void initGameObjects() {
         balls = new ArrayList<>();
-        balls.add(new Ball(BlockBreaker.FRAME_WIDTH/2-5, BlockBreaker.FRAME_HEIGHT-40-30-5, -2, -3));
+        balls.add(new Ball(BlockBreaker.FRAME_WIDTH/2-5, BlockBreaker.FRAME_HEIGHT-40-30-15, -2, -3));
         racket = new Racket(BlockBreaker.FRAME_WIDTH/2-75, BlockBreaker.FRAME_HEIGHT-40-30);
 
-       generateBlocks();    // 블럭 생성
+        playSoundEffect("game_start.wav");
+        generateBlocks();    // 블럭 생성
     }
 
     private void generateBlocks(){
@@ -75,6 +80,7 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
                     if(balls.isEmpty()){
                         running = false;
                         highScore = Math.max(highScore,score);
+                        playSoundEffect("ball_explode.wav");
                         gameScreen.showGameOverScreen(score, highScore);
                     }
                 }
@@ -85,6 +91,7 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
                 generateBlocks();
                 balls.clear();
                 balls.add(new Ball(BlockBreaker.FRAME_WIDTH/2-5, BlockBreaker.FRAME_HEIGHT-40-30-5, -2, -3));
+                playSoundEffect("game_start.wav");
             }
 
             repaint();
@@ -160,6 +167,21 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
 
     @Override
     public void keyReleased(KeyEvent e) {}
+
+    private void playSoundEffect(String fileName) {
+        try {
+            URL url = getClass().getClassLoader().getResource(fileName);
+            if (url == null) {
+                throw new RuntimeException("Audio file not found: " + fileName);
+            }
+            AudioInputStream audio = AudioSystem.getAudioInputStream(url);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audio);
+            clip.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 
 class Ball{
@@ -190,16 +212,21 @@ class Ball{
     public void checkCollision(Racket racket, ArrayList<Block> blocks, ArrayList<Ball> balls){
         Rectangle ballRect = new Rectangle(x, y, size, size);
         if (ballRect.intersects(racket.getBounds())) {
+            playSoundEffect("racket.wav");  // 라켓에 튕겨져나가는 효과음
             dy = -Math.abs(dy); // Always bounce upward
         }
 
         for (int i = blocks.size() - 1; i >= 0; i--){
             Block block = blocks.get(i);
+            String sound_effect = block.isYellow() ? "block_yellow.wav" : "block.wav";
             if(ballRect.intersects(blocks.get(i).getBounds())){
                 blocks.remove(i);
+
+                playSoundEffect(sound_effect);  // 블럭 부딪히는 효과음
                 dy = -dy;
                 GameScreenPanel.score += 10;    // 점수 10점 추가
                 if(block.isYellow()){
+
                     splitBall(balls);
                 }
                 break;
@@ -219,6 +246,21 @@ class Ball{
 
     public int getY(){
         return y;
+    }
+
+    private void playSoundEffect(String fileName) {
+        try {
+            URL url = getClass().getClassLoader().getResource(fileName);
+            if (url == null) {
+                throw new RuntimeException("Audio file not found: " + fileName);
+            }
+            AudioInputStream audio = AudioSystem.getAudioInputStream(url);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audio);
+            clip.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 

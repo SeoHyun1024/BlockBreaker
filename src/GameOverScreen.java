@@ -1,7 +1,11 @@
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.net.URL;
 
 public class GameOverScreen extends JPanel{
     private int score;
@@ -25,6 +29,7 @@ public class GameOverScreen extends JPanel{
             }
         });
 
+        playSoundEffect("game_over.wav");
         startBlinking();
     }
 
@@ -139,5 +144,20 @@ public class GameOverScreen extends JPanel{
         g2.fillOval(627, 212, 5, 5);
         g2.fillOval(595, 319, 5, 5);
         g2.fillOval(734, 247, 5, 5);
+    }
+
+    private void playSoundEffect(String fileName) {
+        try {
+            URL url = getClass().getClassLoader().getResource(fileName);
+            if (url == null) {
+                throw new RuntimeException("Audio file not found: " + fileName);
+            }
+            AudioInputStream audio = AudioSystem.getAudioInputStream(url);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audio);
+            clip.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
