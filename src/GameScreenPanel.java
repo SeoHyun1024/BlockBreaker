@@ -1,11 +1,7 @@
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -20,14 +16,17 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     private static int highScore = 0;
     private  boolean leftPressed = false;
     private  boolean rightPressed = false;
+    private RenderManager renderManager;
 
     public GameScreenPanel(GameScreen gameScreen) {
         this.gameScreen = gameScreen;
+        renderManager = new RenderManager(BlockBreaker.FRAME_WIDTH, BlockBreaker.FRAME_HEIGHT);
         setFocusable(true);
         addKeyListener(this);
         setSize(BlockBreaker.FRAME_WIDTH,BlockBreaker.FRAME_HEIGHT);
         requestFocusInWindow();
         initGameObjects();
+        SoundManager.init();
     }
 
     private void initGameObjects() {
@@ -39,25 +38,43 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
         generateBlocks();    // 블럭 생성
     }
 
-    private void generateBlocks(){
+    private void generateBlocks() {
         blocks = new ArrayList<>();
         int rows = level * 3;
         int cols = level * 3;
+        int totalBlocks = rows * cols;
+        int maxYellowBlocks = totalBlocks / 3;  // 전체 블록의 1/3로 제한
+        int currentYellowBlocks = 0;
+        Random random = new Random();  // Random 객체를 한 번만 생성
 
         int padding = 6;
-        int blockWidth = (BlockBreaker.FRAME_WIDTH - cols * padding - 40 )/cols;
-        int blockHeight = ((BlockBreaker.FRAME_HEIGHT / 3) - 2 * padding)/rows;
+        int blockWidth = (BlockBreaker.FRAME_WIDTH - cols * padding - 40) / cols;
+        int blockHeight = ((BlockBreaker.FRAME_HEIGHT / 3) - 2 * padding) / rows;
 
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
                 int x = 20 + padding + col * (blockWidth + padding);
                 int y = 20 + row * (blockHeight + padding) + padding;
-                boolean isYellow = new Random().nextBoolean();
+
+                // 노란색 블록 생성 여부 결정
+                boolean isYellow = false;
+                if (currentYellowBlocks < maxYellowBlocks) {
+                    // 남은 블록 수를 고려하여 확률 조정
+                    int remainingBlocks = totalBlocks - (row * cols + col);
+                    int remainingNeededYellow = maxYellowBlocks - currentYellowBlocks;
+                    float yellowProbability = (float) remainingNeededYellow / remainingBlocks;
+
+                    if (random.nextFloat() < yellowProbability) {
+                        isYellow = true;
+                        currentYellowBlocks++;
+                    }
+                }
+
                 blocks.add(new Block(x, y, blockWidth, blockHeight, isYellow));
             }
         }
 
-        for (Ball ball : balls){
+        for (Ball ball : balls) {
             ball.increaseSpeed(level);
         }
     }
@@ -118,45 +135,7 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g;
-
-        // 배경 그라데이션
-        GradientPaint background = new GradientPaint(0, 0, new Color(11, 12, 32), 0, getHeight(), new Color(108, 111, 135));
-        g2.setPaint(background);
-        g.fillRect(0, 0, getWidth(), getHeight());
-
-        // 좌측 벽 그리기
-        g.setColor(new Color(66, 25, 11));
-        g.fillRect(0, 0, 20, getHeight());
-        g2.setStroke(new BasicStroke(3));
-        g2.setPaint(new GradientPaint(0, 0, new Color(249, 198, 181), 20, getHeight(), new Color(61, 59, 59)));
-        g2.drawRect(0, 0, 20, getHeight());
-
-        // 우측 벽 그리기
-        g.setColor(new Color(66, 25, 11));
-        g.fillRect(getWidth() - 20, 0, 20, getHeight());
-        g2.setStroke(new BasicStroke(3));
-        g2.setPaint(new GradientPaint(0, 0, new Color(249, 198, 181), 20, getHeight(), new Color(61, 59, 59)));
-        g2.drawRect(getWidth() - 20, 0, 20, getHeight());
-
-        // 상단 벽 그리기
-        g.setColor(new Color(66, 25, 11));
-        g.fillRect(0, 0, getWidth(), 20);
-        g2.setStroke(new BasicStroke(3));
-        g2.setPaint(new GradientPaint(0, 0, new Color(249, 198, 181), 20, getHeight(), new Color(61, 59, 59)));
-        g2.drawRect(0, 0, getWidth(), 20);
-
-        // 벽돌 그리기
-        for (Ball ball : balls){
-            ball.draw(g);
-        }
-
-        // 패들 그리기
-        racket.draw((Graphics2D) g);
-
-        // 블럭 그리기
-        for (Block block : blocks){
-            block.draw((Graphics2D) g);
-        }
+        renderManager.render(g2, balls, blocks, racket);
     }
 
     @Override
@@ -181,18 +160,7 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     }
 
     private void playSoundEffect(String fileName) {
-        try {
-            URL url = getClass().getClassLoader().getResource(fileName);
-            if (url == null) {
-                throw new RuntimeException("Audio file not found: " + fileName);
-            }
-            AudioInputStream audio = AudioSystem.getAudioInputStream(url);
-            Clip clip = AudioSystem.getClip();
-            clip.open(audio);
-            clip.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+       SoundManager.playSound(fileName);
     }
 }
 
@@ -238,7 +206,6 @@ class Ball{
                 dy = -dy;
                 GameScreenPanel.score += 10;    // 점수 10점 추가
                 if(block.isYellow()){
-
                     splitBall(balls);
                 }
                 break;
@@ -261,18 +228,7 @@ class Ball{
     }
 
     private void playSoundEffect(String fileName) {
-        try {
-            URL url = getClass().getClassLoader().getResource(fileName);
-            if (url == null) {
-                throw new RuntimeException("Audio file not found: " + fileName);
-            }
-            AudioInputStream audio = AudioSystem.getAudioInputStream(url);
-            Clip clip = AudioSystem.getClip();
-            clip.open(audio);
-            clip.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+       SoundManager.playSound(fileName);
     }
 }
 
