@@ -18,6 +18,8 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     private int level = 1;
     static int score = 0;
     private static int highScore = 0;
+    private  boolean leftPressed = false;
+    private  boolean rightPressed = false;
 
     public GameScreenPanel(GameScreen gameScreen) {
         this.gameScreen = gameScreen;
@@ -94,6 +96,13 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
                 playSoundEffect("game_start.wav");
             }
 
+            if(leftPressed){
+                racket.moveLeft();
+            }
+            if(rightPressed){
+                racket.moveRight();
+            }
+
             repaint();
 
             try{
@@ -156,17 +165,20 @@ public class GameScreenPanel extends JPanel implements KeyListener, Runnable {
     @Override
     public void keyPressed(KeyEvent e) {
         if(e.getKeyCode() == KeyEvent.VK_LEFT){
-            System.out.println("LEFT");
-            racket.moveLeft();
+            leftPressed = true;
         }else if (e.getKeyCode() == KeyEvent.VK_RIGHT){
-            System.out.println("RIGHT");
-            racket.moveRight();
+           rightPressed = true;
         }
-        repaint();
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {}
+    public void keyReleased(KeyEvent e) {
+        if(e.getKeyCode() == KeyEvent.VK_LEFT){
+            leftPressed = false;
+        }else if (e.getKeyCode() == KeyEvent.VK_RIGHT){
+            rightPressed = false;
+        }
+    }
 
     private void playSoundEffect(String fileName) {
         try {
@@ -273,11 +285,11 @@ class Racket {
     }
 
     public void moveLeft(){
-        x = Math.max(20, x - 20);
+        x = Math.max(20, x - 5);
     }
 
     public void moveRight(){
-        x = Math.min(BlockBreaker.FRAME_WIDTH - width - 20, x + 20);
+        x = Math.min(BlockBreaker.FRAME_WIDTH - width - 20, x + 5);
     }
 
     public void draw(Graphics2D g){
