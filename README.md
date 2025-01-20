@@ -1,11 +1,20 @@
 # JAVA HW - Block Breaker Game
 > JAVA Programming 과제5 : 블럭 부시기 게임
 
-## 개요
+## ✍️ 개요
+1. [Stacks](#1-stacks)
+2. [요구 조건](#2-요구-조건)
+3. [화면 별 기능 명세](#3-화면-별-기능-명세)
+    - [GameTitleScreen](#gametitlescreen)
+    - [GameScreen](#gamescreen)
+    - [GameOverScreen](#gameoverscreen)
+4. [디자인 요소](#4-디자인-요소)
+5. [배경음악 및 효과음](#5-배경음악-및-효과음)
+6. [어려웠던 점](#6-어려웠던-점)
 
 &nbsp;
 
-## 스택
+## 1. Stacks
 ### Environment
 ![](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)
 ![](https://img.shields.io/badge/IntelliJ_IDEA-000000?style=flat-square&logo=intellijidea&logoColor=white)
@@ -18,7 +27,7 @@
 
 &nbsp;
 
-## 요구 조건
+## 2. 요구 조건
 1. 한 파일 안에 통합해서 코드를 작성할 것. ( 채점 이슈 ㅜ)
 2. 자바의 Swing 및 Java2D 등의 라이브러리를 이용하여 만들것
 3. Thread를 이용하여 애니메이션 및 조작이 가능하도록 할 것
@@ -29,7 +38,7 @@
 
 &nbsp;
 
-## 화면 별 기능 명세
+## 3. 화면 별 기능 명세
 ### GameTitleScreen
 <img src="https://github.com/user-attachments/assets/45b212cd-0791-419a-9eed-eeccc1391e5a" width="500px" height="500px" alt="GameTitleScreen"></img><br/>
 
@@ -56,14 +65,13 @@
 
 &nbsp;
 
-## 디자인 요소
+## 4. 디자인 요소
 - text를 두 개 겹쳐서 입체감을 줬다. 
 
-## 배경음악 및 효과음
+## 5. 배경음악 및 효과음
 
-## 어려웠던 점
+## 6. 어려웠던 점
 - 사실 복잡한 기능이 있는 프로젝트는 아니라서 기능 구현 단에서 크게 어려움은 없었음.
 - 생각보다 효과음 부분에서 시간을 오래썼음. 적적한 타이밍에 적절한 효과음과 배경을 넣는 게 게임의 퀄리티를 확 올려준다는 것을 알게 됨.
 - 
 
-## 
